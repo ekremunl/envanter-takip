@@ -14,7 +14,7 @@ import {
   UtensilsCrossed,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type CategoryKey =
   | "kahvalti"
@@ -265,93 +265,14 @@ function getEmptyForm(category: CategoryKey): FormState {
       };
 }
 
-type Html2PdfWorker = {
-  set: (options: unknown) => Html2PdfWorker;
-  from: (source: HTMLElement) => Html2PdfWorker;
-  outputPdf: (type: "blob") => Promise<Blob>;
-};
-
-type Html2PdfFactory = () => Html2PdfWorker;
-
-let html2pdfLoader: Promise<Html2PdfFactory> | null = null;
-
-function downloadBlob(blob: Blob, fileName: string) {
-  const downloadUrl = window.URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = downloadUrl;
-  link.download = fileName;
-  link.click();
-  window.URL.revokeObjectURL(downloadUrl);
-}
-
-function createPdfClone(reportElement: HTMLElement) {
-  const clone = reportElement.cloneNode(true);
-
-  if (!(clone instanceof HTMLElement)) {
-    throw new Error("PDF klonu oluşturulamadı.");
-  }
-
-  clone.classList.add("pdf-mode", "pdf-export-clone");
-  clone.querySelectorAll("button, .screen-only, [data-pdf-exclude='true']").forEach((element) => {
-    element.remove();
-  });
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "pdf-export-wrapper";
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
-
-  return {
-    clone,
-    cleanup: () => wrapper.remove(),
-  };
-}
-
-async function loadHtml2Pdf() {
-  if (typeof window === "undefined") {
-    throw new Error("html2pdf yalnızca istemci tarafında yüklenebilir.");
-  }
-
-  if (!html2pdfLoader) {
-    html2pdfLoader = import("html2pdf.js").then((module) => module.default as Html2PdfFactory);
-  }
-
-  return html2pdfLoader;
-}
-
 export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
   const [forms, setForms] = useState<Record<CategoryKey, FormState>>(getInitialForms);
-  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
-  const [isSharing, setIsSharing] = useState(false);
-  const reportRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     persistStorage(storage);
   }, [storage]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    void loadHtml2Pdf().catch((error) => {
-      console.error("html2pdf preload failed", error);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!shareFeedback) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      setShareFeedback(null);
-    }, 3000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [shareFeedback]);
 
   const selectedDayRecord = useMemo(() => getDayRecord(storage, selectedDate), [selectedDate, storage]);
   const savedDays = useMemo(() => sortDateKeys(Object.keys(storage.records)), [storage.records]);
@@ -460,124 +381,19 @@ export default function TrackerApp() {
       return;
     }
 
-    const shareTitle = "Günlük Envanter ve Tüketim Takibi";
-    const shareText =
-      `${formatDisplayDate(selectedDate)} tarihli rapor • ${totalEntries} kayıt • ${populatedCategoryCount} aktif kategori`;
-    const fileName = `envanter-raporu-${selectedDate}.pdf`;
-
     try {
-      setIsSharing(true);
-      const reportElement = reportRef.current;
-
-      if (!reportElement) {
-        setShareFeedback("PDF oluşturulacak rapor alanı bulunamadı.");
-        return;
+      if (navigator.share) {
+        await navigator.share({
+          title: "Günlük Tüketim Raporu",
+          text: "Günlük tüketim raporunu ekteki PDF üzerinden veya sayfayı yazdırarak inceleyebilirsiniz.",
+          url: window.location.href,
+        });
+      } else {
+        window.print();
       }
-
-      const html2pdf = await loadHtml2Pdf();
-      const { clone, cleanup } = createPdfClone(reportElement);
-      const opt: {
-        margin: [number, number, number, number];
-        filename: string;
-        image: { type: "jpeg"; quality: number };
-        html2canvas: {
-          scale: number;
-          useCORS: boolean;
-          letterRendering: boolean;
-          backgroundColor: string;
-        };
-        jsPDF: { unit: "mm"; format: "a4"; orientation: "portrait" };
-        pagebreak: { mode: string[] };
-      } = {
-        margin: [8, 8, 8, 8],
-        filename: fileName,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          letterRendering: true,
-          backgroundColor: "#ffffff",
-        },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "legacy"] },
-      };
-      let pdfBlob: Blob;
-
-      try {
-        pdfBlob = await html2pdf().set(opt).from(clone).outputPdf("blob");
-      } finally {
-        cleanup();
-      }
-
-      const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
-      const canUseShare =
-        typeof navigator !== "undefined" &&
-        typeof navigator.share === "function" &&
-        typeof navigator.canShare === "function" &&
-        navigator.canShare({ files: [pdfFile] });
-
-      if (canUseShare) {
-        try {
-          await navigator.share({
-            title: shareTitle,
-            text: shareText,
-            files: [pdfFile],
-          });
-          setShareFeedback("PDF paylaşım penceresi açıldı.");
-          return;
-        } catch (error) {
-          if (error instanceof Error && error.name === "AbortError") {
-            return;
-          }
-
-          console.error("Sharing failed", error);
-        }
-      }
-
-      downloadBlob(pdfBlob, fileName);
-      setShareFeedback("PDF indirildi. Cihazından paylaşabilirsin.");
     } catch (error) {
-      console.error("Sharing failed", error);
-
-      if (error instanceof Error && error.name === "AbortError") {
-        return;
-      }
-
-      const reportElement = reportRef.current;
-
-      if (reportElement) {
-        try {
-          const html2pdf = await loadHtml2Pdf();
-          const { clone, cleanup } = createPdfClone(reportElement);
-          const fallbackBlob = await html2pdf()
-            .set({
-              margin: [8, 8, 8, 8] as [number, number, number, number],
-              filename: fileName,
-              image: { type: "jpeg", quality: 0.98 },
-              html2canvas: {
-                scale: 2,
-                useCORS: true,
-                letterRendering: true,
-                backgroundColor: "#ffffff",
-              },
-              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-              pagebreak: { mode: ["css", "legacy"] },
-            })
-            .from(clone)
-            .outputPdf("blob")
-            .finally(() => cleanup());
-
-          downloadBlob(fallbackBlob, fileName);
-          setShareFeedback("Paylaşım açılamadı, PDF indirildi.");
-          return;
-        } catch (fallbackError) {
-          console.error("Fallback download failed", fallbackError);
-        }
-      }
-
-      setShareFeedback("Paylaşım açılamadı, lütfen tekrar dene.");
-    } finally {
-      setIsSharing(false);
+      console.error("Share failed:", error);
+      window.print();
     }
   };
 
@@ -631,7 +447,7 @@ export default function TrackerApp() {
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/40 hover:bg-white/10"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/40 hover:bg-white/10 print:hidden"
                 >
                   <Share2 className="h-4 w-4" />
                   Paylaş
@@ -640,16 +456,12 @@ export default function TrackerApp() {
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400 print:hidden"
                 >
                   <Printer className="h-4 w-4" />
                   Yazdır / PDF Olarak Kaydet
                 </button>
               </div>
-
-              {shareFeedback ? (
-                <p className="text-center text-xs text-slate-400">{shareFeedback}</p>
-              ) : null}
             </div>
           </div>
 
@@ -769,7 +581,6 @@ export default function TrackerApp() {
 
             <section
               id="report-content"
-              ref={reportRef}
               className="print-a4-sheet rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:h-auto print:overflow-visible print:rounded-none print:border-gray-200 print:bg-white print:p-1"
             >
               <div className="report-header mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-5 print:mb-2 print:flex-row print:items-start print:justify-between print:border-slate-300 print:pb-2">
