@@ -9,6 +9,7 @@ import {
   MoonStar,
   Plus,
   Printer,
+  Share2,
   Sandwich,
   UtensilsCrossed,
   X,
@@ -268,10 +269,23 @@ export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
   const [forms, setForms] = useState<Record<CategoryKey, FormState>>(getInitialForms);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     persistStorage(storage);
   }, [storage]);
+
+  useEffect(() => {
+    if (!shareFeedback) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShareFeedback(null);
+    }, 3000);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [shareFeedback]);
 
   const selectedDayRecord = useMemo(() => getDayRecord(storage, selectedDate), [selectedDate, storage]);
   const savedDays = useMemo(() => sortDateKeys(Object.keys(storage.records)), [storage.records]);
@@ -375,6 +389,43 @@ export default function TrackerApp() {
     window.print();
   };
 
+  const handleShare = async () => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const shareUrl = window.location.href;
+    const shareTitle = "Günlük Envanter ve Tüketim Takibi";
+    const shareText =
+      `${formatDisplayDate(selectedDate)} tarihli rapor • ${totalEntries} kayıt • ${populatedCategoryCount} aktif kategori`;
+
+    try {
+      if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        setShareFeedback("Paylaşım penceresi açıldı.");
+        return;
+      }
+
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(`${shareTitle}\n${shareText}\n${shareUrl}`);
+        setShareFeedback("Paylaşım bilgileri panoya kopyalandı.");
+        return;
+      }
+
+      setShareFeedback("Bu cihazda paylaşım desteklenmiyor.");
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+
+      setShareFeedback("Paylaşım sırasında bir sorun oluştu.");
+    }
+  };
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_40%),linear-gradient(180deg,_#09090f_0%,_#111827_100%)] text-slate-100 print:h-auto print:min-h-0 print:overflow-visible print:bg-none print:bg-white print:text-black">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-3 py-4 sm:gap-8 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:px-0 print:py-0">
@@ -421,14 +472,29 @@ export default function TrackerApp() {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400"
-              >
-                <Printer className="h-4 w-4" />
-                Yazdır / PDF Olarak Kaydet
-              </button>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/40 hover:bg-white/10"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Paylaş
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handlePrint}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400"
+                >
+                  <Printer className="h-4 w-4" />
+                  Yazdır / PDF Olarak Kaydet
+                </button>
+              </div>
+
+              {shareFeedback ? (
+                <p className="text-center text-xs text-slate-400">{shareFeedback}</p>
+              ) : null}
             </div>
           </div>
 
