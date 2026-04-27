@@ -1,0 +1,45 @@
+{
+  "name": "envanter-takip",
+  "version": "1.0.0",
+  "description": "Gunluk envanter ve tuketim takibi icin Next.js uygulamasi",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ekremunl/envanter-takip.git"
+  },
+  "keywords": [
+    "nextjs",
+    "inventory",
+    "tracking",
+    "github-pages"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ekremunl/envanter-takip/issues"
+  },
+  "homepage": "https://ekremunl.github.io/envanter-takip/",
+  "dependencies": {
+    "lucide-react": "^1.11.0",
+    "next": "^16.2.4",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.4",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.4",
+    "postcss": "^8.5.12",
+    "tailwindcss": "^4.2.4",
+    "typescript": "^6.0.3"
+  }
+}
