@@ -60,12 +60,14 @@ body {
     color: #111827 !important;
   }
 
-  .print-report-flow {
+  .print-report-flow,
+  .report-grid {
     column-count: 2;
     column-gap: 16px;
   }
 
-  .print-report-card {
+  .print-report-card,
+  .report-card {
     break-inside: avoid;
     page-break-inside: avoid;
     display: inline-block;
@@ -79,27 +81,34 @@ body {
     column-span: all;
   }
 
-  .print-report-title {
+  .print-report-title,
+  .report-title {
     font-size: 12pt !important;
     line-height: 1.1 !important;
   }
 
-  .print-report-meta {
+  .print-report-meta,
+  .report-date-badge {
     font-size: 11pt !important;
     line-height: 1.1 !important;
   }
 
-  .print-report-card-title {
+  .print-report-card-title,
+  .report-card-title {
     font-size: 11pt !important;
     line-height: 1.1 !important;
   }
 
-  .print-report-card-subtitle {
+  .print-report-card-subtitle,
+  .report-card-subtitle {
     font-size: 9.5pt !important;
     line-height: 1.1 !important;
   }
 
-  .print-report-item {
+  .print-report-item,
+  .report-item-name,
+  .report-item-qty,
+  .report-item-inline {
     font-size: 10pt !important;
     line-height: 1.05 !important;
   }
