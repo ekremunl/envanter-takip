@@ -75,3 +75,20 @@ body {
     vertical-align: top;
   }
 }
+
+@media print {
+  html,
+  body,
+  main {
+    background-color: white !important;
+    color: black !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

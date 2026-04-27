@@ -376,9 +376,9 @@ export default function TrackerApp() {
   };
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_40%),linear-gradient(180deg,_#09090f_0%,_#111827_100%)] text-slate-100 print:h-auto print:overflow-visible print:bg-white print:text-black">
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_40%),linear-gradient(180deg,_#09090f_0%,_#111827_100%)] text-slate-100 print:h-auto print:min-h-0 print:overflow-visible print:bg-none print:bg-white print:text-black">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-3 py-4 sm:gap-8 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:px-0 print:py-0">
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-fuchsia-950/20 backdrop-blur print:h-auto print:overflow-visible print:rounded-none print:border-gray-200 print:bg-white print:shadow-none">
+        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-fuchsia-950/20 backdrop-blur print:h-auto print:min-h-0 print:overflow-visible print:rounded-none print:border-gray-200 print:bg-white print:shadow-none">
           <div className="grid gap-5 border-b border-white/10 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[1.6fr_1fr] lg:px-8 print:hidden">
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/30 bg-fuchsia-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-fuchsia-200 sm:text-xs">
