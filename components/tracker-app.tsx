@@ -595,7 +595,7 @@ export default function TrackerApp() {
                 </div>
               ) : null}
 
-              <div className="report-grid grid gap-3 sm:gap-4 print:grid print:grid-cols-2 print:gap-2" aria-live="polite">
+              <div className="report-grid" aria-live="polite">
                 {CATEGORY_META.map((category) => {
                   const Icon = category.icon;
                   const entries = selectedDayRecord[category.key];
@@ -604,9 +604,9 @@ export default function TrackerApp() {
                   return (
                     <article
                       key={`report-${category.key}`}
-                      className={`report-card rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:break-inside-avoid print:rounded-md print:border-gray-200 print:bg-white print:p-1 ${
+                      className={`report-card mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-gray-200 print:bg-white print:p-1 ${
                         entries.length === 0 ? "print:hidden" : ""
-                      } ${shouldSpanFullWidth ? "report-card-wide print:col-span-2" : ""}
+                      } ${shouldSpanFullWidth ? "report-card-wide" : ""}
                       `}
                     >
                       <div className="report-card-header mb-3 flex items-center gap-3 print:mb-1 print:gap-1">

@@ -61,22 +61,22 @@ body {
   }
 
   .print-report-flow {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
+    column-count: 2;
+    column-gap: 16px;
   }
 
   .print-report-card {
     break-inside: avoid;
     page-break-inside: avoid;
-    display: block;
+    display: inline-block;
     width: 100%;
-    margin: 0;
+    margin: 0 0 12px;
     vertical-align: top;
   }
 
   .print-span-full {
-    grid-column: 1 / -1;
+    display: block;
+    column-span: all;
   }
 
   .print-report-title {
