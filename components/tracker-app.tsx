@@ -14,7 +14,7 @@ import {
   UtensilsCrossed,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type CategoryKey =
   | "kahvalti"
@@ -149,14 +149,6 @@ function formatQuantity(value: number) {
   return Number.isInteger(value) ? `${value}` : value.toFixed(2).replace(/\.?0+$/, "");
 }
 
-function getUnitLabel(unit: Unit, short = false) {
-  if (unit === "gram") {
-    return short ? "gr" : "Gram";
-  }
-
-  return "Adet";
-}
-
 function sortDateKeys(dateKeys: string[]) {
   return [...dateKeys].sort((first, second) => second.localeCompare(first));
 }
@@ -273,150 +265,13 @@ function getEmptyForm(category: CategoryKey): FormState {
       };
 }
 
-async function buildReportPdf(options: {
-  selectedDate: string;
-  totalEntries: number;
-  populatedCategoryCount: number;
-  activeCategories: Array<(typeof CATEGORY_META)[number]>;
-  selectedDayRecord: DayRecord;
-}) {
-  const { jsPDF } = await import("jspdf");
-  const doc = new jsPDF({
-    orientation: "landscape",
-    unit: "mm",
-    format: "a4",
-    compress: true,
-  });
-
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 8;
-  const headerHeight = 16;
-  const summaryHeight = 10;
-  const gap = 4;
-  const columns = options.activeCategories.length > 4 ? 3 : 2;
-  const rows = Math.max(1, Math.ceil(Math.max(options.activeCategories.length, 1) / columns));
-  const cardsTop = margin + headerHeight + summaryHeight + gap * 2;
-  const cardsHeight = pageHeight - cardsTop - margin;
-  const cardWidth = (pageWidth - margin * 2 - gap * (columns - 1)) / columns;
-  const cardHeight = (cardsHeight - gap * (rows - 1)) / rows;
-
-  doc.setFillColor(255, 255, 255);
-  doc.rect(0, 0, pageWidth, pageHeight, "F");
-  doc.setTextColor(17, 24, 39);
-  doc.setDrawColor(229, 231, 235);
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text("Günlük Envanter ve Tüketim Özeti", margin, margin + 5);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(100, 116, 139);
-  doc.text(formatDisplayDate(options.selectedDate), pageWidth - margin, margin + 5, { align: "right" });
-
-  const summaryY = margin + headerHeight;
-  doc.setTextColor(51, 65, 85);
-  doc.setFillColor(248, 250, 252);
-  doc.roundedRect(margin, summaryY - 4, 52, 8, 2, 2, "FD");
-  doc.roundedRect(margin + 56, summaryY - 4, 46, 8, 2, 2, "FD");
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.text(`Toplam ${options.totalEntries} kayıt`, margin + 3, summaryY + 1);
-  doc.text(`${options.populatedCategoryCount} aktif kategori`, margin + 59, summaryY + 1);
-
-  const categories =
-    options.activeCategories.length > 0
-      ? options.activeCategories
-      : [
-          {
-            key: "kahvalti" as CategoryKey,
-            title: "Kayıt Yok",
-            description: "Seçili tarihte paylaşılacak kayıt bulunmuyor.",
-            icon: Coffee,
-          },
-        ];
-
-  categories.forEach((category, index) => {
-    const col = index % columns;
-    const row = Math.floor(index / columns);
-    const x = margin + col * (cardWidth + gap);
-    const y = cardsTop + row * (cardHeight + gap);
-    const entries =
-      category.key in options.selectedDayRecord ? options.selectedDayRecord[category.key as CategoryKey] : [];
-
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(226, 232, 240);
-    doc.roundedRect(x, y, cardWidth, cardHeight, 2, 2, "FD");
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8.5);
-    doc.setTextColor(17, 24, 39);
-    doc.text(category.title, x + 3, y + 5);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(7);
-    doc.setTextColor(100, 116, 139);
-    doc.text(
-      entries.length > 0 ? `${entries.length} kayıt bulundu` : category.description,
-      x + 3,
-      y + 9,
-      { maxWidth: cardWidth - 6 },
-    );
-
-    if (entries.length === 0) {
-      return;
-    }
-
-    const contentTop = y + 13;
-    const contentBottom = y + cardHeight - 3;
-    const lineHeight = 4;
-    let currentY = contentTop;
-
-    for (const entry of entries) {
-      if (currentY + lineHeight > contentBottom) {
-        doc.setFontSize(6.5);
-        doc.setTextColor(148, 163, 184);
-        doc.text("Devamı için uygulamada raporu açın.", x + 3, contentBottom);
-        break;
-      }
-
-      doc.setDrawColor(241, 245, 249);
-      doc.line(x + 3, currentY - 1.2, x + cardWidth - 3, currentY - 1.2);
-
-      const itemLabel =
-        category.key === "firinUrunleri" && entry.bakeryType
-          ? `${entry.productName} (${entry.bakeryType})`
-          : entry.productName;
-
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(6.8);
-      doc.setTextColor(30, 41, 59);
-      doc.text(itemLabel, x + 3, currentY + 1, {
-        maxWidth: cardWidth - 28,
-      });
-
-      doc.setFont("helvetica", "bold");
-      doc.text(
-        `${formatQuantity(entry.quantity)} ${getUnitLabel(entry.unit, true)}`,
-        x + cardWidth - 3,
-        currentY + 1,
-        { align: "right" },
-      );
-
-      currentY += lineHeight;
-    }
-  });
-
-  return doc;
-}
-
 export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
   const [forms, setForms] = useState<Record<CategoryKey, FormState>>(getInitialForms);
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
+  const reportRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     persistStorage(storage);
@@ -548,15 +403,43 @@ export default function TrackerApp() {
 
     try {
       setIsSharing(true);
+      const reportElement = reportRef.current;
 
-      const doc = await buildReportPdf({
-        selectedDate,
-        totalEntries,
-        populatedCategoryCount,
-        activeCategories,
-        selectedDayRecord,
-      });
-      const pdfBlob = doc.output("blob");
+      if (!reportElement) {
+        setShareFeedback("PDF oluşturulacak rapor alanı bulunamadı.");
+        return;
+      }
+
+      reportElement.classList.add("pdf-mode");
+
+      const html2pdfModule = await import("html2pdf.js");
+      const html2pdf = html2pdfModule.default;
+      const opt: {
+        margin: [number, number, number, number];
+        filename: string;
+        image: { type: "jpeg"; quality: number };
+        html2canvas: {
+          scale: number;
+          useCORS: boolean;
+          letterRendering: boolean;
+          backgroundColor: string;
+        };
+        jsPDF: { unit: "mm"; format: "a4"; orientation: "portrait" };
+        pagebreak: { mode: string[] };
+      } = {
+        margin: [8, 8, 8, 8],
+        filename: fileName,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          backgroundColor: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] },
+      };
+      const pdfBlob = (await html2pdf().set(opt).from(reportElement).outputPdf("blob")) as Blob;
       const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
 
       if (
@@ -574,7 +457,12 @@ export default function TrackerApp() {
         return;
       }
 
-      doc.save(fileName);
+      const downloadUrl = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(downloadUrl);
       setShareFeedback("PDF indirildi. Cihazından paylaşabilirsin.");
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
@@ -583,6 +471,7 @@ export default function TrackerApp() {
 
       setShareFeedback("PDF paylaşımı sırasında bir sorun oluştu.");
     } finally {
+      reportRef.current?.classList.remove("pdf-mode");
       setIsSharing(false);
     }
   };

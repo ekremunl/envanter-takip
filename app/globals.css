@@ -92,3 +92,8 @@ body {
     print-color-adjust: exact !important;
   }
 }
+
+.pdf-mode,
+.pdf-mode * {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
