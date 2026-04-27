@@ -265,6 +265,60 @@ function getEmptyForm(category: CategoryKey): FormState {
       };
 }
 
+type Html2PdfWorker = {
+  set: (options: unknown) => Html2PdfWorker;
+  from: (source: HTMLElement) => Html2PdfWorker;
+  outputPdf: (type: "blob") => Promise<Blob>;
+};
+
+type Html2PdfFactory = () => Html2PdfWorker;
+
+let html2pdfLoader: Promise<Html2PdfFactory> | null = null;
+
+function downloadBlob(blob: Blob, fileName: string) {
+  const downloadUrl = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = downloadUrl;
+  link.download = fileName;
+  link.click();
+  window.URL.revokeObjectURL(downloadUrl);
+}
+
+function createPdfClone(reportElement: HTMLElement) {
+  const clone = reportElement.cloneNode(true);
+
+  if (!(clone instanceof HTMLElement)) {
+    throw new Error("PDF klonu oluşturulamadı.");
+  }
+
+  clone.classList.add("pdf-mode", "pdf-export-clone");
+  clone.querySelectorAll("button, .screen-only, [data-pdf-exclude='true']").forEach((element) => {
+    element.remove();
+  });
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "pdf-export-wrapper";
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  return {
+    clone,
+    cleanup: () => wrapper.remove(),
+  };
+}
+
+async function loadHtml2Pdf() {
+  if (typeof window === "undefined") {
+    throw new Error("html2pdf yalnızca istemci tarafında yüklenebilir.");
+  }
+
+  if (!html2pdfLoader) {
+    html2pdfLoader = import("html2pdf.js").then((module) => module.default as Html2PdfFactory);
+  }
+
+  return html2pdfLoader;
+}
+
 export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
@@ -276,6 +330,16 @@ export default function TrackerApp() {
   useEffect(() => {
     persistStorage(storage);
   }, [storage]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    void loadHtml2Pdf().catch((error) => {
+      console.error("html2pdf preload failed", error);
+    });
+  }, []);
 
   useEffect(() => {
     if (!shareFeedback) {
@@ -410,10 +474,8 @@ export default function TrackerApp() {
         return;
       }
 
-      reportElement.classList.add("pdf-mode");
-
-      const html2pdfModule = await import("html2pdf.js");
-      const html2pdf = html2pdfModule.default;
+      const html2pdf = await loadHtml2Pdf();
+      const { clone, cleanup } = createPdfClone(reportElement);
       const opt: {
         margin: [number, number, number, number];
         filename: string;
@@ -439,39 +501,82 @@ export default function TrackerApp() {
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         pagebreak: { mode: ["css", "legacy"] },
       };
-      const pdfBlob = (await html2pdf().set(opt).from(reportElement).outputPdf("blob")) as Blob;
-      const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+      let pdfBlob: Blob;
 
-      if (
+      try {
+        pdfBlob = await html2pdf().set(opt).from(clone).outputPdf("blob");
+      } finally {
+        cleanup();
+      }
+
+      const pdfFile = new File([pdfBlob], fileName, { type: "application/pdf" });
+      const canUseShare =
         typeof navigator !== "undefined" &&
         typeof navigator.share === "function" &&
         typeof navigator.canShare === "function" &&
-        navigator.canShare({ files: [pdfFile] })
-      ) {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          files: [pdfFile],
-        });
-        setShareFeedback("PDF paylaşım penceresi açıldı.");
-        return;
+        navigator.canShare({ files: [pdfFile] });
+
+      if (canUseShare) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            files: [pdfFile],
+          });
+          setShareFeedback("PDF paylaşım penceresi açıldı.");
+          return;
+        } catch (error) {
+          if (error instanceof Error && error.name === "AbortError") {
+            return;
+          }
+
+          console.error("Sharing failed", error);
+        }
       }
 
-      const downloadUrl = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = downloadUrl;
-      link.download = fileName;
-      link.click();
-      window.URL.revokeObjectURL(downloadUrl);
+      downloadBlob(pdfBlob, fileName);
       setShareFeedback("PDF indirildi. Cihazından paylaşabilirsin.");
     } catch (error) {
+      console.error("Sharing failed", error);
+
       if (error instanceof Error && error.name === "AbortError") {
         return;
       }
 
-      setShareFeedback("PDF paylaşımı sırasında bir sorun oluştu.");
+      const reportElement = reportRef.current;
+
+      if (reportElement) {
+        try {
+          const html2pdf = await loadHtml2Pdf();
+          const { clone, cleanup } = createPdfClone(reportElement);
+          const fallbackBlob = await html2pdf()
+            .set({
+              margin: [8, 8, 8, 8] as [number, number, number, number],
+              filename: fileName,
+              image: { type: "jpeg", quality: 0.98 },
+              html2canvas: {
+                scale: 2,
+                useCORS: true,
+                letterRendering: true,
+                backgroundColor: "#ffffff",
+              },
+              jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+              pagebreak: { mode: ["css", "legacy"] },
+            })
+            .from(clone)
+            .outputPdf("blob")
+            .finally(() => cleanup());
+
+          downloadBlob(fallbackBlob, fileName);
+          setShareFeedback("Paylaşım açılamadı, PDF indirildi.");
+          return;
+        } catch (fallbackError) {
+          console.error("Fallback download failed", fallbackError);
+        }
+      }
+
+      setShareFeedback("Paylaşım açılamadı, lütfen tekrar dene.");
     } finally {
-      reportRef.current?.classList.remove("pdf-mode");
       setIsSharing(false);
     }
   };

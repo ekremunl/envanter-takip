@@ -136,6 +136,22 @@ body {
   font-family: Arial, Helvetica, sans-serif !important;
 }
 
+.pdf-clone-host {
+  position: fixed;
+  top: 0;
+  left: -10000px;
+  width: 794px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: -1;
+}
+
+.pdf-clone-host .pdf-hide,
+.pdf-clone-host button,
+.pdf-clone-host [role="button"] {
+  display: none !important;
+}
+
 .pdf-mode {
   background: white !important;
   color: black !important;
