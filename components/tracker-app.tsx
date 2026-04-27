@@ -376,9 +376,9 @@ export default function TrackerApp() {
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_40%),linear-gradient(180deg,_#09090f_0%,_#111827_100%)] text-slate-100">
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_40%),linear-gradient(180deg,_#09090f_0%,_#111827_100%)] text-slate-100 print:h-auto print:overflow-visible print:bg-white print:text-black">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-3 py-4 sm:gap-8 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:px-0 print:py-0">
-        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-fuchsia-950/20 backdrop-blur print:rounded-none print:border-0 print:bg-white print:shadow-none">
+        <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-fuchsia-950/20 backdrop-blur print:h-auto print:overflow-visible print:rounded-none print:border-gray-200 print:bg-white print:shadow-none">
           <div className="grid gap-5 border-b border-white/10 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[1.6fr_1fr] lg:px-8 print:hidden">
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/30 bg-fuchsia-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-fuchsia-200 sm:text-xs">
@@ -546,7 +546,7 @@ export default function TrackerApp() {
               </div>
             </section>
 
-            <section className="print-a4-sheet rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:rounded-none print:border-0 print:bg-white print:p-0">
+            <section className="print-a4-sheet rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:h-auto print:overflow-visible print:rounded-none print:border-gray-200 print:bg-white print:p-2">
               <div className="mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-5 print:mb-2 print:flex-row print:items-start print:justify-between print:border-slate-300 print:pb-2">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-fuchsia-200 print:text-[9px] print:tracking-[0.18em] print:text-slate-500">
@@ -590,7 +590,7 @@ export default function TrackerApp() {
                 </div>
               ) : null}
 
-              <div className="print-report-flow grid gap-3 sm:gap-4 print:block" aria-live="polite">
+              <div className="grid gap-3 sm:gap-4 print:grid print:grid-cols-2 print:gap-2" aria-live="polite">
                 {CATEGORY_META.map((category) => {
                   const Icon = category.icon;
                   const entries = selectedDayRecord[category.key];
@@ -598,12 +598,12 @@ export default function TrackerApp() {
                   return (
                     <article
                       key={`report-${category.key}`}
-                      className={`print-report-card rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-slate-300 print:bg-white print:p-1.5 ${
+                      className={`rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:break-inside-avoid print:rounded-md print:border-gray-200 print:bg-white print:p-2 ${
                         entries.length === 0 ? "print:hidden" : ""
                       }`}
                     >
                       <div className="mb-3 flex items-center gap-3 print:mb-1 print:gap-1">
-                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-slate-300 print:bg-slate-100 print:p-0.75 print:text-slate-700">
+                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-gray-200 print:bg-white print:p-1 print:text-slate-700">
                           <Icon className="h-4 w-4 print:h-3 print:w-3" />
                         </div>
                         <div>
@@ -654,17 +654,17 @@ export default function TrackerApp() {
                               {entries.map((entry) => (
                                 <div
                                   key={`${entry.id}-print`}
-                                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-1 border-b border-slate-200 py-[2px] last:border-b-0"
+                                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-1 border-b border-slate-200 py-[1px] last:border-b-0"
                                 >
                                   <div className="min-w-0">
-                                    <p className="break-words text-[9px] font-medium leading-[11px] text-slate-900">
+                                    <p className="break-words text-[8px] font-medium leading-[10px] text-slate-900">
                                       {entry.productName}
                                       {category.key === "firinUrunleri" && entry.bakeryType
                                         ? ` (${entry.bakeryType})`
                                         : ""}
                                     </p>
                                   </div>
-                                  <div className="whitespace-nowrap text-right text-[9px] font-semibold leading-[11px] text-slate-700">
+                                  <div className="whitespace-nowrap pl-1 text-right text-[8px] font-semibold leading-[10px] text-slate-700">
                                     {formatQuantity(entry.quantity)}{" "}
                                     {entry.unit === "gram" ? "gr" : "adet"}
                                   </div>

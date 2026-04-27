@@ -12,8 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
-      <body>{children}</body>
+    <html lang="tr" className="print:bg-white">
+      <body className="min-h-screen bg-slate-950 text-slate-100 print:h-auto print:overflow-visible print:bg-white print:text-black">
+        {children}
+      </body>
     </html>
   );
 }

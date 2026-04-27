@@ -4,6 +4,12 @@
   color-scheme: dark;
 }
 
+@media print {
+  :root {
+    color-scheme: light;
+  }
+}
+
 body {
   min-height: 100vh;
   background:
@@ -24,10 +30,11 @@ body {
 @media print {
   @page {
     size: A4 landscape;
-    margin: 2.5mm;
+    margin: 4mm;
   }
 
   html {
+    background: white;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
@@ -36,6 +43,7 @@ body {
     min-height: auto;
     background: white;
     color: black;
+    overflow: visible;
   }
 
   .no-print {
@@ -53,15 +61,17 @@ body {
   }
 
   .print-report-flow {
-    column-count: 2;
-    column-gap: 8px;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .print-report-card {
     break-inside: avoid;
-    display: inline-block;
+    page-break-inside: avoid;
+    display: block;
     width: 100%;
-    margin: 0 0 8px;
+    margin: 0;
     vertical-align: top;
   }
 }
