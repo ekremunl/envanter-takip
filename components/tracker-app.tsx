@@ -660,20 +660,20 @@ export default function TrackerApp() {
                               {entries.map((entry) => (
                                 <div
                                   key={`${entry.id}-print`}
-                                  className="report-item-row flex items-start gap-1 border-b border-slate-200 py-[1px] last:border-b-0"
+                                  className="report-item-row border-b border-slate-200 py-[1px] last:border-b-0"
                                 >
-                                  <div className="min-w-0 max-w-[72%]">
-                                    <p className="report-item-name break-words text-[10pt] font-medium leading-tight text-slate-900">
+                                  <p className="report-item-inline text-[10pt] leading-tight text-slate-900">
+                                    <span className="report-item-name font-medium">
                                       {entry.productName}
                                       {category.key === "firinUrunleri" && entry.bakeryType
                                         ? ` (${entry.bakeryType})`
                                         : ""}
-                                    </p>
-                                  </div>
-                                  <div className="report-item-qty whitespace-nowrap text-[10pt] font-semibold leading-tight text-slate-700">
+                                    </span>
+                                    <span className="report-item-qty whitespace-nowrap font-semibold text-slate-700">
                                     {formatQuantity(entry.quantity)}{" "}
                                     {entry.unit === "gram" ? "gr" : "adet"}
-                                  </div>
+                                    </span>
+                                  </p>
                                 </div>
                               ))}
                             </div>

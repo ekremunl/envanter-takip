@@ -104,12 +104,6 @@ body {
     line-height: 1.05 !important;
   }
 
-  .report-item-row {
-    grid-template-columns: minmax(0, auto) auto !important;
-    justify-content: start !important;
-    column-gap: 6px !important;
-  }
-
   .report-item-qty {
     padding-left: 0 !important;
     text-align: left !important;
