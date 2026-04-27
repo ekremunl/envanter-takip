@@ -29,8 +29,8 @@ body {
 
 @media print {
   @page {
-    size: A4 landscape;
-    margin: 4mm;
+    size: A4 portrait;
+    margin: 8mm;
   }
 
   html {
@@ -63,7 +63,7 @@ body {
   .print-report-flow {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 6px;
   }
 
   .print-report-card {
@@ -73,6 +73,44 @@ body {
     width: 100%;
     margin: 0;
     vertical-align: top;
+  }
+
+  .print-span-full {
+    grid-column: 1 / -1;
+  }
+
+  .print-report-title {
+    font-size: 12pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .print-report-meta {
+    font-size: 11pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .print-report-card-title {
+    font-size: 11pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .print-report-card-subtitle {
+    font-size: 9.5pt !important;
+    line-height: 1.1 !important;
+  }
+
+  .print-report-item {
+    font-size: 10pt !important;
+    line-height: 1.05 !important;
+  }
+
+  .print-report-compact {
+    gap: 6px !important;
+  }
+
+  #report-content {
+    transform: scale(0.98);
+    transform-origin: top;
   }
 }
 
@@ -96,4 +134,9 @@ body {
 .pdf-mode,
 .pdf-mode * {
   font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.pdf-mode {
+  background: white !important;
+  color: black !important;
 }
