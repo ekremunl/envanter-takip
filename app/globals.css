@@ -24,7 +24,7 @@ body {
 @media print {
   @page {
     size: A4 landscape;
-    margin: 4mm;
+    margin: 2.5mm;
   }
 
   html {
@@ -50,5 +50,18 @@ body {
 
   .print-text {
     color: #111827 !important;
+  }
+
+  .print-report-flow {
+    column-count: 2;
+    column-gap: 8px;
+  }
+
+  .print-report-card {
+    break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 8px;
+    vertical-align: top;
   }
 }

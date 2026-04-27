@@ -279,10 +279,11 @@ export default function TrackerApp() {
     () => CATEGORY_META.reduce((total, category) => total + selectedDayRecord[category.key].length, 0),
     [selectedDayRecord],
   );
-  const populatedCategoryCount = useMemo(
-    () => CATEGORY_META.filter((category) => selectedDayRecord[category.key].length > 0).length,
+  const activeCategories = useMemo(
+    () => CATEGORY_META.filter((category) => selectedDayRecord[category.key].length > 0),
     [selectedDayRecord],
   );
+  const populatedCategoryCount = activeCategories.length;
 
   const updateStorage = (updater: (current: StoragePayload) => StoragePayload) => {
     setStorage((current) => sanitizePayload(updater(current)));
@@ -545,21 +546,21 @@ export default function TrackerApp() {
               </div>
             </section>
 
-            <section className="rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:rounded-none print:border-0 print:bg-white print:p-0">
+            <section className="print-a4-sheet rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:rounded-none print:border-0 print:bg-white print:p-0">
               <div className="mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-5 print:mb-2 print:flex-row print:items-start print:justify-between print:border-slate-300 print:pb-2">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-fuchsia-200 print:text-slate-500">
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-fuchsia-200 print:text-[9px] print:tracking-[0.18em] print:text-slate-500">
                     Günlük Rapor
                   </p>
-                  <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl print:mt-1 print:text-[16px] print:text-slate-900">
+                  <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl print:mt-1 print:text-[14px] print:leading-4 print:text-slate-900">
                     Günlük Envanter ve Tüketim Özeti
                   </h2>
                   <p className="mt-1 text-sm leading-6 text-slate-400 print:hidden">
                     Seçilen tarihteki tüm kategoriler ve tüketim kayıtları tek sayfada listelenir.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-3 text-left text-sm font-medium text-fuchsia-100 sm:text-right print:min-w-[170px] print:border-slate-300 print:bg-slate-50 print:px-2.5 print:py-1.5 print:text-right print:text-[10px] print:text-slate-700">
-                  <div className="text-xs uppercase tracking-[0.2em] text-fuchsia-200/80 print:text-slate-500">
+                <div className="rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-3 text-left text-sm font-medium text-fuchsia-100 sm:text-right print:min-w-[158px] print:border-slate-300 print:bg-slate-50 print:px-2 print:py-1 print:text-right print:text-[9px] print:leading-3 print:text-slate-700">
+                  <div className="text-xs uppercase tracking-[0.2em] text-fuchsia-200/80 print:text-[8px] print:tracking-[0.16em] print:text-slate-500">
                     Tarih
                   </div>
                   <div>{formatDisplayDate(selectedDate)}</div>
@@ -573,7 +574,7 @@ export default function TrackerApp() {
                 <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:border-slate-300 print:bg-white print:px-2 print:py-0.5 print:text-[9px] print:text-slate-700">
                   {populatedCategoryCount} aktif kategori
                 </div>
-                {CATEGORY_META.filter((category) => selectedDayRecord[category.key].length > 0).map((category) => (
+                {activeCategories.map((category) => (
                   <div
                     key={`summary-${category.key}`}
                     className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:hidden"
@@ -597,19 +598,19 @@ export default function TrackerApp() {
                   return (
                     <article
                       key={`report-${category.key}`}
-                      className={`print-report-card rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-lg print:border-slate-300 print:bg-white print:p-2 ${
+                      className={`print-report-card rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-slate-300 print:bg-white print:p-1.5 ${
                         entries.length === 0 ? "print:hidden" : ""
                       }`}
                     >
-                      <div className="mb-3 flex items-center gap-3 print:mb-1.5 print:gap-1.5">
-                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-slate-300 print:bg-slate-100 print:p-1 print:text-slate-700">
-                          <Icon className="h-4 w-4" />
+                      <div className="mb-3 flex items-center gap-3 print:mb-1 print:gap-1">
+                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-slate-300 print:bg-slate-100 print:p-0.75 print:text-slate-700">
+                          <Icon className="h-4 w-4 print:h-3 print:w-3" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-white print:text-[11px] print:leading-4 print:text-slate-900">
+                          <h3 className="font-semibold text-white print:text-[10px] print:leading-3 print:text-slate-900">
                             {category.title}
                           </h3>
-                          <p className="text-xs text-slate-400 print:text-[9px] print:leading-3 print:text-slate-500">
+                          <p className="text-xs text-slate-400 print:text-[8px] print:leading-3 print:text-slate-500">
                             {entries.length > 0 ? `${entries.length} kayıt bulundu` : "Kayıt bulunmuyor"}
                           </p>
                         </div>
@@ -649,23 +650,21 @@ export default function TrackerApp() {
                           </div>
 
                           <div className="hidden print:block">
-                            <div className="space-y-0.5">
+                            <div className="space-y-0">
                               {entries.map((entry) => (
                                 <div
                                   key={`${entry.id}-print`}
-                                  className="grid grid-cols-[1fr_auto] gap-1.5 border-b border-slate-200 py-0.5 last:border-b-0"
+                                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-1 border-b border-slate-200 py-[2px] last:border-b-0"
                                 >
                                   <div className="min-w-0">
-                                    <p className="break-words text-[10px] font-medium leading-3 text-slate-900">
+                                    <p className="break-words text-[9px] font-medium leading-[11px] text-slate-900">
                                       {entry.productName}
+                                      {category.key === "firinUrunleri" && entry.bakeryType
+                                        ? ` (${entry.bakeryType})`
+                                        : ""}
                                     </p>
-                                    {category.key === "firinUrunleri" && entry.bakeryType ? (
-                                      <p className="text-[8px] uppercase tracking-[0.14em] text-slate-500">
-                                        {entry.bakeryType}
-                                      </p>
-                                    ) : null}
                                   </div>
-                                  <div className="text-right text-[10px] font-semibold leading-3 text-slate-700">
+                                  <div className="whitespace-nowrap text-right text-[9px] font-semibold leading-[11px] text-slate-700">
                                     {formatQuantity(entry.quantity)}{" "}
                                     {entry.unit === "gram" ? "gr" : "adet"}
                                   </div>
