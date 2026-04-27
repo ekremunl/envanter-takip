@@ -6,10 +6,10 @@ import {
   CalendarDays,
   Coffee,
   Croissant,
+  Download,
   MoonStar,
   Plus,
   Printer,
-  Share2,
   Sandwich,
   UtensilsCrossed,
   X,
@@ -268,7 +268,7 @@ function getEmptyForm(category: CategoryKey): FormState {
 type Html2PdfWorker = {
   set: (options: unknown) => Html2PdfWorker;
   from: (source: HTMLElement) => Html2PdfWorker;
-  output: (type: "blob") => Promise<Blob>;
+  save: () => Promise<void>;
 };
 
 type Html2PdfFactory = () => Html2PdfWorker;
@@ -277,7 +277,7 @@ export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
   const [forms, setForms] = useState<Record<CategoryKey, FormState>>(getInitialForms);
-  const [isSharing, setIsSharing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     persistStorage(storage);
@@ -385,7 +385,7 @@ export default function TrackerApp() {
     window.print();
   };
 
-  const handleSharePDF = async () => {
+  const handleDownloadPDF = async () => {
     if (typeof window === "undefined") {
       return;
     }
@@ -404,27 +404,16 @@ export default function TrackerApp() {
     };
 
     try {
-      setIsSharing(true);
+      setIsDownloading(true);
 
       const html2pdf = (await import("html2pdf.js")).default as unknown as Html2PdfFactory;
-      const pdfBlob = await html2pdf().set(opt).from(element).output("blob");
-      const file = new File([pdfBlob], "Gunluk_Rapor.pdf", { type: "application/pdf" });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: "Günlük Tüketim Raporu",
-        });
-      } else {
-        alert(
-          'Telefonunuzun tarayıcısı doğrudan dosya paylaşımını desteklemiyor. Lütfen "Yazdır" butonuna basıp PDF olarak kaydedin.',
-        );
-      }
+      await html2pdf().set(opt).from(element).save();
+      alert("PDF başarıyla indirildi. Dosyalarınızdan WhatsApp vb. ile paylaşabilirsiniz.");
     } catch (error) {
-      console.error("Share failed:", error);
-      alert("Paylaşım sırasında bir hata oluştu.");
+      console.error("İndirme başarısız:", error);
+      alert('PDF oluşturulurken bir hata oluştu. Lütfen "Yazdır" butonunu kullanın.');
     } finally {
-      setIsSharing(false);
+      setIsDownloading(false);
     }
   };
 
@@ -477,12 +466,12 @@ export default function TrackerApp() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={handleSharePDF}
-                  disabled={isSharing}
+                  onClick={handleDownloadPDF}
+                  disabled={isDownloading}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/40 hover:bg-white/10 print:hidden"
                 >
-                  <Share2 className="h-4 w-4" />
-                  {isSharing ? "PDF Hazırlanıyor..." : "Paylaş"}
+                  <Download className="h-4 w-4" />
+                  {isDownloading ? "PDF İndiriliyor..." : "Raporu İndir"}
                 </button>
 
                 <button
@@ -491,7 +480,7 @@ export default function TrackerApp() {
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400 print:hidden"
                 >
                   <Printer className="h-4 w-4" />
-                  Yazdır / PDF Olarak Kaydet
+                  Yazdır
                 </button>
               </div>
             </div>
