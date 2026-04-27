@@ -599,14 +599,13 @@ export default function TrackerApp() {
                 {CATEGORY_META.map((category) => {
                   const Icon = category.icon;
                   const entries = selectedDayRecord[category.key];
-                  const shouldSpanFullWidth = entries.length > 8;
 
                   return (
                     <article
                       key={`report-${category.key}`}
                       className={`report-card mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-gray-200 print:bg-white print:p-1 ${
                         entries.length === 0 ? "print:hidden" : ""
-                      } ${shouldSpanFullWidth ? "report-card-wide" : ""}
+                      }
                       `}
                     >
                       <div className="report-card-header mb-3 flex items-center gap-3 print:mb-1 print:gap-1">
