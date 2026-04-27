@@ -265,10 +265,19 @@ function getEmptyForm(category: CategoryKey): FormState {
       };
 }
 
+type Html2PdfWorker = {
+  set: (options: unknown) => Html2PdfWorker;
+  from: (source: HTMLElement) => Html2PdfWorker;
+  output: (type: "blob") => Promise<Blob>;
+};
+
+type Html2PdfFactory = () => Html2PdfWorker;
+
 export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
   const [forms, setForms] = useState<Record<CategoryKey, FormState>>(getInitialForms);
+  const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
     persistStorage(storage);
@@ -376,24 +385,46 @@ export default function TrackerApp() {
     window.print();
   };
 
-  const handleShare = async () => {
+  const handleSharePDF = async () => {
     if (typeof window === "undefined") {
       return;
     }
 
+    const element = document.getElementById("report-content");
+    if (!element) {
+      return;
+    }
+
+    const opt = {
+      margin: 5,
+      filename: "Gunluk_Tuketim_Raporu.pdf",
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+    };
+
     try {
-      if (navigator.share) {
+      setIsSharing(true);
+
+      const html2pdf = (await import("html2pdf.js")).default as unknown as Html2PdfFactory;
+      const pdfBlob = await html2pdf().set(opt).from(element).output("blob");
+      const file = new File([pdfBlob], "Gunluk_Rapor.pdf", { type: "application/pdf" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
         await navigator.share({
+          files: [file],
           title: "Günlük Tüketim Raporu",
-          text: "Günlük tüketim raporunu ekteki PDF üzerinden veya sayfayı yazdırarak inceleyebilirsiniz.",
-          url: window.location.href,
         });
       } else {
-        window.print();
+        alert(
+          'Telefonunuzun tarayıcısı doğrudan dosya paylaşımını desteklemiyor. Lütfen "Yazdır" butonuna basıp PDF olarak kaydedin.',
+        );
       }
     } catch (error) {
       console.error("Share failed:", error);
-      window.print();
+      alert("Paylaşım sırasında bir hata oluştu.");
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -446,11 +477,12 @@ export default function TrackerApp() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={handleShare}
+                  onClick={handleSharePDF}
+                  disabled={isSharing}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/40 hover:bg-white/10 print:hidden"
                 >
                   <Share2 className="h-4 w-4" />
-                  Paylaş
+                  {isSharing ? "PDF Hazırlanıyor..." : "Paylaş"}
                 </button>
 
                 <button
