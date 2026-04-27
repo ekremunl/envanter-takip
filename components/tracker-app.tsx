@@ -603,13 +603,13 @@ export default function TrackerApp() {
                   return (
                     <article
                       key={`report-${category.key}`}
-                      className={`report-card mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-gray-200 print:bg-white print:p-1 ${
+                      className={`report-card mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-gray-200 print:bg-white print:p-0.5 ${
                         entries.length === 0 ? "print:hidden" : ""
                       }
                       `}
                     >
-                      <div className="report-card-header mb-3 flex items-center gap-3 print:mb-1 print:gap-1">
-                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-gray-200 print:bg-white print:p-1 print:text-slate-700">
+                      <div className="report-card-header mb-3 flex items-center gap-3 print:mb-0.5 print:gap-0.5">
+                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-gray-200 print:bg-white print:p-0.5 print:text-slate-700">
                           <Icon className="h-4 w-4 print:h-3 print:w-3" />
                         </div>
                         <div>
@@ -660,9 +660,9 @@ export default function TrackerApp() {
                               {entries.map((entry) => (
                                 <div
                                   key={`${entry.id}-print`}
-                                  className="report-item-row grid grid-cols-[minmax(0,1fr)_auto] items-start gap-1 border-b border-slate-200 py-[2px] last:border-b-0"
+                                  className="report-item-row flex items-start gap-1 border-b border-slate-200 py-[1px] last:border-b-0"
                                 >
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 max-w-[72%]">
                                     <p className="report-item-name break-words text-[10pt] font-medium leading-tight text-slate-900">
                                       {entry.productName}
                                       {category.key === "firinUrunleri" && entry.bakeryType
@@ -670,7 +670,7 @@ export default function TrackerApp() {
                                         : ""}
                                     </p>
                                   </div>
-                                  <div className="report-item-qty whitespace-nowrap pl-1 text-right text-[10pt] font-semibold leading-tight text-slate-700">
+                                  <div className="report-item-qty whitespace-nowrap text-[10pt] font-semibold leading-tight text-slate-700">
                                     {formatQuantity(entry.quantity)}{" "}
                                     {entry.unit === "gram" ? "gr" : "adet"}
                                   </div>
