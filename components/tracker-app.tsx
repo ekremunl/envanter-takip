@@ -6,7 +6,6 @@ import {
   CalendarDays,
   Coffee,
   Croissant,
-  Download,
   MoonStar,
   Plus,
   Printer,
@@ -265,19 +264,10 @@ function getEmptyForm(category: CategoryKey): FormState {
       };
 }
 
-type Html2PdfWorker = {
-  set: (options: unknown) => Html2PdfWorker;
-  from: (source: HTMLElement) => Html2PdfWorker;
-  save: () => Promise<void>;
-};
-
-type Html2PdfFactory = () => Html2PdfWorker;
-
 export default function TrackerApp() {
   const [selectedDate, setSelectedDate] = useState(() => formatDateKey(new Date()));
   const [storage, setStorage] = useState<StoragePayload>(() => readStorage());
   const [forms, setForms] = useState<Record<CategoryKey, FormState>>(getInitialForms);
-  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     persistStorage(storage);
@@ -385,38 +375,6 @@ export default function TrackerApp() {
     window.print();
   };
 
-  const handleDownloadPDF = async () => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const element = document.getElementById("report-content");
-    if (!element) {
-      return;
-    }
-
-    const opt = {
-      margin: 5,
-      filename: "Gunluk_Tuketim_Raporu.pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    };
-
-    try {
-      setIsDownloading(true);
-
-      const html2pdf = (await import("html2pdf.js")).default as unknown as Html2PdfFactory;
-      await html2pdf().set(opt).from(element).save();
-      alert("PDF başarıyla indirildi. Dosyalarınızdan WhatsApp vb. ile paylaşabilirsiniz.");
-    } catch (error) {
-      console.error("İndirme başarısız:", error);
-      alert('PDF oluşturulurken bir hata oluştu. Lütfen "Yazdır" butonunu kullanın.');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   return (
     <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top,_rgba(168,85,247,0.18),_transparent_40%),linear-gradient(180deg,_#09090f_0%,_#111827_100%)] text-slate-100 print:h-auto print:min-h-0 print:overflow-visible print:bg-none print:bg-white print:text-black">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-3 py-4 sm:gap-8 sm:px-6 sm:py-8 lg:px-8 print:max-w-none print:px-0 print:py-0">
@@ -463,24 +421,14 @@ export default function TrackerApp() {
                 </div>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={handleDownloadPDF}
-                  disabled={isDownloading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:border-fuchsia-400/40 hover:bg-white/10 print:hidden"
-                >
-                  <Download className="h-4 w-4" />
-                  {isDownloading ? "PDF İndiriliyor..." : "Raporu İndir"}
-                </button>
-
+              <div className="flex justify-center">
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400 print:hidden"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-fuchsia-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-fuchsia-400 sm:w-auto print:hidden"
                 >
                   <Printer className="h-4 w-4" />
-                  Yazdır
+                  Yazdır / PDF Olarak Kaydet
                 </button>
               </div>
             </div>
