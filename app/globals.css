@@ -22,7 +22,18 @@ body {
 }
 
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 8mm;
+  }
+
+  html {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   body {
+    min-height: auto;
     background: white;
     color: black;
   }
