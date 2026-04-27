@@ -431,7 +431,7 @@ export default function TrackerApp() {
             </div>
           </div>
 
-          <div className="grid gap-6 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[1.45fr_1fr] lg:px-8 print:block print:px-5 print:py-5">
+          <div className="grid gap-6 px-4 py-5 sm:px-6 sm:py-8 lg:grid-cols-[1.45fr_1fr] lg:px-8 print:block print:px-2 print:py-2">
             <section className="space-y-5 print:hidden">
               <div>
                 <h2 className="text-xl font-semibold text-white">Günlük Giriş Formları</h2>
@@ -546,19 +546,19 @@ export default function TrackerApp() {
             </section>
 
             <section className="rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:rounded-none print:border-0 print:bg-white print:p-0">
-              <div className="mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-5 print:mb-3 print:flex-row print:items-start print:justify-between print:border-slate-300 print:pb-3">
+              <div className="mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-5 print:mb-2 print:flex-row print:items-start print:justify-between print:border-slate-300 print:pb-2">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.24em] text-fuchsia-200 print:text-slate-500">
                     Günlük Rapor
                   </p>
-                  <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl print:text-[20px] print:text-slate-900">
+                  <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl print:mt-1 print:text-[16px] print:text-slate-900">
                     Günlük Envanter ve Tüketim Özeti
                   </h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-400 print:text-[11px] print:leading-4 print:text-slate-600">
+                  <p className="mt-1 text-sm leading-6 text-slate-400 print:hidden">
                     Seçilen tarihteki tüm kategoriler ve tüketim kayıtları tek sayfada listelenir.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-3 text-left text-sm font-medium text-fuchsia-100 sm:text-right print:min-w-[200px] print:border-slate-300 print:bg-slate-50 print:px-3 print:py-2 print:text-right print:text-[11px] print:text-slate-700">
+                <div className="rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-3 text-left text-sm font-medium text-fuchsia-100 sm:text-right print:min-w-[170px] print:border-slate-300 print:bg-slate-50 print:px-2.5 print:py-1.5 print:text-right print:text-[10px] print:text-slate-700">
                   <div className="text-xs uppercase tracking-[0.2em] text-fuchsia-200/80 print:text-slate-500">
                     Tarih
                   </div>
@@ -566,17 +566,17 @@ export default function TrackerApp() {
                 </div>
               </div>
 
-              <div className="mb-4 flex flex-wrap gap-2 print:mb-3 print:gap-1.5">
-                <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-100 print:border-slate-300 print:bg-slate-50 print:px-2.5 print:text-[10px] print:text-slate-700">
+              <div className="mb-4 flex flex-wrap gap-2 print:mb-2 print:gap-1">
+                <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-100 print:border-slate-300 print:bg-slate-50 print:px-2 print:py-0.5 print:text-[9px] print:text-slate-700">
                   Toplam {totalEntries} kayıt
                 </div>
-                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:border-slate-300 print:bg-white print:px-2.5 print:text-[10px] print:text-slate-700">
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:border-slate-300 print:bg-white print:px-2 print:py-0.5 print:text-[9px] print:text-slate-700">
                   {populatedCategoryCount} aktif kategori
                 </div>
                 {CATEGORY_META.filter((category) => selectedDayRecord[category.key].length > 0).map((category) => (
                   <div
                     key={`summary-${category.key}`}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:border-slate-300 print:bg-white print:px-2.5 print:text-[10px] print:text-slate-700"
+                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:hidden"
                   >
                     {category.title}: {selectedDayRecord[category.key].length}
                   </div>
@@ -589,7 +589,7 @@ export default function TrackerApp() {
                 </div>
               ) : null}
 
-              <div className="grid gap-3 sm:gap-4 print:grid-cols-2 print:gap-2" aria-live="polite">
+              <div className="print-report-flow grid gap-3 sm:gap-4 print:block" aria-live="polite">
                 {CATEGORY_META.map((category) => {
                   const Icon = category.icon;
                   const entries = selectedDayRecord[category.key];
@@ -597,19 +597,19 @@ export default function TrackerApp() {
                   return (
                     <article
                       key={`report-${category.key}`}
-                      className={`rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:break-inside-avoid print:rounded-xl print:border-slate-300 print:bg-white print:p-3 ${
+                      className={`print-report-card rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-lg print:border-slate-300 print:bg-white print:p-2 ${
                         entries.length === 0 ? "print:hidden" : ""
                       }`}
                     >
-                      <div className="mb-3 flex items-center gap-3 print:mb-2 print:gap-2">
-                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-slate-300 print:bg-slate-100 print:p-1.5 print:text-slate-700">
+                      <div className="mb-3 flex items-center gap-3 print:mb-1.5 print:gap-1.5">
+                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-slate-300 print:bg-slate-100 print:p-1 print:text-slate-700">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-white print:text-sm print:text-slate-900">
+                          <h3 className="font-semibold text-white print:text-[11px] print:leading-4 print:text-slate-900">
                             {category.title}
                           </h3>
-                          <p className="text-xs text-slate-400 print:text-[10px] print:text-slate-500">
+                          <p className="text-xs text-slate-400 print:text-[9px] print:leading-3 print:text-slate-500">
                             {entries.length > 0 ? `${entries.length} kayıt bulundu` : "Kayıt bulunmuyor"}
                           </p>
                         </div>
@@ -649,23 +649,23 @@ export default function TrackerApp() {
                           </div>
 
                           <div className="hidden print:block">
-                            <div className="space-y-1">
+                            <div className="space-y-0.5">
                               {entries.map((entry) => (
                                 <div
                                   key={`${entry.id}-print`}
-                                  className="grid grid-cols-[1fr_auto] gap-2 border-b border-slate-200 py-1 last:border-b-0"
+                                  className="grid grid-cols-[1fr_auto] gap-1.5 border-b border-slate-200 py-0.5 last:border-b-0"
                                 >
                                   <div className="min-w-0">
-                                    <p className="truncate text-[11px] font-medium leading-4 text-slate-900">
+                                    <p className="break-words text-[10px] font-medium leading-3 text-slate-900">
                                       {entry.productName}
                                     </p>
                                     {category.key === "firinUrunleri" && entry.bakeryType ? (
-                                      <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                                      <p className="text-[8px] uppercase tracking-[0.14em] text-slate-500">
                                         {entry.bakeryType}
                                       </p>
                                     ) : null}
                                   </div>
-                                  <div className="text-right text-[11px] font-semibold leading-4 text-slate-700">
+                                  <div className="text-right text-[10px] font-semibold leading-3 text-slate-700">
                                     {formatQuantity(entry.quantity)}{" "}
                                     {entry.unit === "gram" ? "gr" : "adet"}
                                   </div>
