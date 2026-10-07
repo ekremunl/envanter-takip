@@ -530,6 +530,7 @@ export default function TrackerApp() {
                           >
                             <option value="gram">Gram</option>
                             <option value="adet">Adet</option>
+                            <option value="adet">kg</option>
                           </select>
                         </label>
 
