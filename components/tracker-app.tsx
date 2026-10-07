@@ -487,4 +487,274 @@ export default function TrackerApp() {
                             }
                             className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-fuchsia-400/60 focus:ring-2 focus:ring-fuchsia-400/30"
                           >
-                            {BAKERY_TYPES.map((option)
+                            {BAKERY_TYPES.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      ) : null}
+
+                      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-[1.4fr_0.7fr_0.7fr_auto]">
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-200">Ürün Adı</span>
+                          <input
+                            list={`product-pool-${category.key}`}
+                            value={categoryForm.productName}
+                            onChange={(event) =>
+                              updateForm(category.key, "productName", event.target.value)
+                            }
+                            placeholder="Örn. Peynir, Çorba, Su"
+                            className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-fuchsia-400/60 focus:ring-2 focus:ring-fuchsia-400/30"
+                          />
+                          <datalist id={`product-pool-${category.key}`}>
+                            {storage.productPool.map((product) => (
+                              <option key={product} value={product} />
+                            ))}
+                          </datalist>
+                        </label>
+
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-200">Miktar</span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="any"
+                            value={categoryForm.quantity}
+                            onChange={(event) => updateForm(category.key, "quantity", event.target.value)}
+                            placeholder="0"
+                            className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-fuchsia-400/60 focus:ring-2 focus:ring-fuchsia-400/30"
+                          />
+                        </label>
+
+                        <label className="space-y-2">
+                          <span className="text-sm font-medium text-slate-200">Birim</span>
+                          <select
+                            value={categoryForm.unit}
+                            onChange={(event) => updateForm(category.key, "unit", event.target.value as Unit)}
+                            className="w-full rounded-2xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-fuchsia-400/60 focus:ring-2 focus:ring-fuchsia-400/30"
+                          >
+                            <option value="gram">Gram</option>
+                            <option value="adet">Adet</option>
+                            <option value="kg">kg</option>
+                          </select>
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => addEntry(category.key)}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-white md:mt-7 xl:w-auto"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Ekle
+                        </button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section
+              id="report-content"
+              className="print-a4-sheet rounded-3xl border border-white/10 bg-slate-950/40 p-4 sm:p-5 print:h-auto print:overflow-visible print:rounded-none print:border-gray-200 print:bg-white print:p-1"
+            >
+              <div className="report-header mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-5 sm:flex-row sm:items-start sm:justify-between sm:pb-5 print:mb-2 print:flex-row print:items-start print:justify-between print:border-slate-300 print:pb-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-fuchsia-200 print:text-[9pt] print:tracking-[0.18em] print:leading-tight print:text-slate-500">
+                    Günlük Rapor
+                  </p>
+                  <h2 className="report-title mt-2 text-xl font-semibold text-white sm:text-2xl print:mt-1 print:text-[12pt] print:leading-tight print:text-slate-900">
+                    Günlük Tüketim Raporu
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-400 print:hidden">
+                    Seçilen tarihteki tüm kategoriler ve tüketim kayıtları tek sayfada listelenir.
+                  </p>
+                </div>
+                <div className="report-date-badge rounded-2xl border border-fuchsia-400/20 bg-fuchsia-400/10 px-4 py-3 text-left text-sm font-medium text-fuchsia-100 sm:text-right print:min-w-[158px] print:border-slate-300 print:bg-slate-50 print:px-2 print:py-1 print:text-right print:text-[10pt] print:leading-tight print:text-slate-700">
+                  <div className="text-xs uppercase tracking-[0.2em] text-fuchsia-200/80 print:text-[8pt] print:tracking-[0.16em] print:leading-tight print:text-slate-500">
+                    Tarih
+                  </div>
+                  <div>{formatDisplayDate(selectedDate)}</div>
+                </div>
+              </div>
+
+              <div className="report-summary mb-4 flex flex-wrap gap-2 print:mb-2 print:gap-2">
+                <div className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-xs font-medium text-fuchsia-100 print:border-slate-300 print:bg-slate-50 print:px-2 print:py-0.5 print:text-[10pt] print:leading-tight print:text-slate-700">
+                  Toplam {totalEntries} kayıt
+                </div>
+                <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:border-slate-300 print:bg-white print:px-2 print:py-0.5 print:text-[10pt] print:leading-tight print:text-slate-700">
+                  {populatedCategoryCount} aktif kategori
+                </div>
+                {activeCategories.map((category) => (
+                  <div
+                    key={`summary-${category.key}`}
+                    className="report-summary-extra rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300 print:hidden"
+                  >
+                    {category.title}: {selectedDayRecord[category.key].length}
+                  </div>
+                ))}
+              </div>
+
+              {totalEntries === 0 ? (
+                <div className="hidden rounded-2xl border border-dashed border-slate-300 px-4 py-6 text-center text-sm text-slate-500 print:block print:rounded-xl print:px-3 print:py-4 print:text-[11px]">
+                  Seçili tarihte yazdırılacak kayıt bulunmuyor.
+                </div>
+              ) : null}
+
+              <div className="report-grid" aria-live="polite">
+                {CATEGORY_META.map((category) => {
+                  const Icon = category.icon;
+                  const entries = selectedDayRecord[category.key];
+
+                  return (
+                    <article
+                      key={`report-${category.key}`}
+                      className={`report-card mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 print:rounded-md print:border-gray-200 print:bg-white print:p-0.5 ${
+                        entries.length === 0 ? "print:hidden" : ""
+                      }`}
+                    >
+                      <div className="report-card-header mb-3 flex items-center gap-3 print:mb-0.5 print:gap-0.5">
+                        <div className="rounded-xl border border-fuchsia-400/20 bg-fuchsia-400/10 p-2 text-fuchsia-200 print:border-gray-200 print:bg-white print:p-0.5 print:text-slate-700">
+                          <Icon className="h-4 w-4 print:h-3 print:w-3" />
+                        </div>
+                        <div>
+                          <h3 className="report-card-title font-semibold text-white print:text-[11pt] print:leading-tight print:text-slate-900">
+                            {category.title}
+                          </h3>
+                          <p className="report-card-subtitle text-xs text-slate-400 print:text-[9pt] print:leading-tight print:text-slate-500">
+                            {entries.length > 0 ? `${entries.length} kayıt bulundu` : "Kayıt bulunmuyor"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {entries.length > 0 ? (
+                        <>
+                          <div className="space-y-2 print:hidden">
+                            {entries.map((entry) => (
+                              <div
+                                key={entry.id}
+                                className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 sm:flex-row sm:items-start sm:justify-between print:border-slate-200 print:bg-white"
+                              >
+                                <div>
+                                  <p className="font-medium text-white print:text-slate-900">
+                                    {entry.productName}
+                                  </p>
+                                  <p className="text-sm text-slate-400 print:text-slate-600">
+                                    {category.key === "firinUrunleri" && entry.bakeryType
+                                      ? `${entry.bakeryType} · `
+                                      : ""}
+                                    {formatQuantity(entry.quantity)}{" "}
+                                    {formatUnitLabel(entry.unit)}
+                                  </p>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => removeEntry(category.key, entry.id)}
+                                  className="self-end rounded-full border border-white/10 p-2 text-slate-400 transition hover:border-rose-400/40 hover:text-rose-300 sm:self-start print:hidden"
+                                  aria-label={`${entry.productName} kaydını sil`}
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="hidden print:block">
+                            <div className="report-items space-y-0">
+                              {entries.map((entry) => (
+                                <div
+                                  key={`${entry.id}-print`}
+                                  className="report-item-row border-b border-slate-200 py-[1px] last:border-b-0"
+                                >
+                                  <p className="report-item-inline text-[10pt] leading-tight text-slate-900">
+                                    <span className="report-item-name font-medium">
+                                      {entry.productName}
+                                      {category.key === "firinUrunleri" && entry.bakeryType
+                                        ? ` (${entry.bakeryType})`
+                                        : ""}
+                                    </span>
+                                    <span className="report-item-qty whitespace-nowrap font-semibold text-slate-700">
+                                      {formatQuantity(entry.quantity)}{" "}
+                                      {formatUnitLabel(entry.unit, true)}
+                                    </span>
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-slate-500 print:border-slate-300 print:text-slate-500">
+                          Bu kategori için seçili tarihte kayıt yok.
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+
+          <div className="grid gap-4 border-t border-white/10 bg-slate-950/30 px-4 py-5 sm:px-6 sm:py-6 lg:grid-cols-[1.15fr_1fr] lg:px-8 print:hidden">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white">Ürün Havuzu</h2>
+              <p className="mt-1 text-sm text-slate-400">
+                Yeni girilen ürün adları otomatik kaydedilir ve sonraki girişlerde açılır öneri olarak kullanılır.
+              </p>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {storage.productPool.length > 0 ? (
+                  storage.productPool.map((product) => (
+                    <span
+                      key={product}
+                      className="rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-xs text-fuchsia-100 sm:text-sm"
+                    >
+                      {product}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500">Henüz ürün havuzunda kayıt yok.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-4 sm:p-5">
+              <h2 className="text-lg font-semibold text-white">Saklama Kuralları</h2>
+              <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-300">
+                <li>• Veriler tarayıcıda localStorage ile saklanır.</li>
+                <li>• Uygulama yalnızca son 10 günün kayıtlarını korur.</li>
+                <li>• Daha eski veriler otomatik olarak temizlenir.</li>
+                <li>• Yazdır ekranı üzerinden PDF olarak dışa aktarım yapılabilir.</li>
+              </ul>
+
+              {savedDays.length > 0 ? (
+                <div className="mt-4 rounded-2xl border border-white/10 bg-slate-900/70 p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Kayıtlı Günler</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {savedDays.map((day) => (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => setSelectedDate(day)}
+                        className={`rounded-full border px-3 py-1 text-xs transition ${
+                          selectedDate === day
+                            ? "border-fuchsia-300 bg-fuchsia-400/15 text-fuchsia-100"
+                            : "border-white/10 text-slate-300 hover:border-fuchsia-400/40 hover:text-white"
+                        }`}
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  );
+}
