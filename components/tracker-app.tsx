@@ -22,7 +22,7 @@ type CategoryKey =
   | "araOgun"
   | "firinUrunleri";
 
-type Unit = "gram" | "adet";
+type Unit = "gram" | "adet" | "kg";
 
 type Entry = {
   id: string;
